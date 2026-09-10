@@ -1,0 +1,64 @@
+# ==============================================================================
+# Git Ignore Configuration for AI-Medico (Streamlit Cloud Production)
+# ==============================================================================
+
+# Virtual Environment
+.venv/
+venv/
+ENV/
+env/
+*.env
+
+# Python bytecode & cache
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.ipynb_checkpoints/
+
+# ------------------------------------------------------------------------------
+# Large Training & Evaluation Datasets (Keep local - DO NOT push to GitHub)
+# ------------------------------------------------------------------------------
+data/
+Test/
+Train/
+Test.zip
+*.zip
+normal_encoded_dataset.csv
+symptom_precaution.csv
+
+# ------------------------------------------------------------------------------
+# Training Notebooks & Standalone Scripts (Keep local)
+# ------------------------------------------------------------------------------
+image_model.ipynb
+NLP_chatbot.ipynb
+2_binary_segmention.py
+
+# ------------------------------------------------------------------------------
+# Large Trained Models (Hosted on Hugging Face Model Hub - >100 MB)
+# ------------------------------------------------------------------------------
+models/*.pth
+models/*.keras
+skin_cancer_finetuned.keras
+*.pth
+*.keras
+*.h5
+
+# ------------------------------------------------------------------------------
+# Redundant / Duplicate Pickles
+# ------------------------------------------------------------------------------
+tfidf_matrix.pkl
+tfidf_vectorizer.pkl
+
+# ------------------------------------------------------------------------------
+# Runtime Generated Files & Local Database
+# ------------------------------------------------------------------------------
+patient_reports/
+uploads/
+patients.db
+
+# ------------------------------------------------------------------------------
+# Sensitive Secrets & Hugging Face Tokens
+# ------------------------------------------------------------------------------
+v.txt
+.streamlit/secrets.toml
