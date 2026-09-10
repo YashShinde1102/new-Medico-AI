@@ -42,12 +42,25 @@ tr["prognosis"] = tr["prognosis"].astype(str).str.strip()
 symptoms = [col for col in df.columns if col != "prognosis"]
 diseases = sorted(df["prognosis"].unique())
 mapping = {d: i for i, d in enumerate(diseases)}
-df.replace({"prognosis": mapping}, inplace=True)
-tr.replace({"prognosis": mapping}, inplace=True)
 
-X, y = df[symptoms], np.ravel(df[["prognosis"]])
-X_test, y_test = tr[symptoms], np.ravel(tr[["prognosis"]])
+df["prognosis"] = df["prognosis"].map(mapping).astype(int)
+tr["prognosis"] = tr["prognosis"].map(mapping).astype(int)
 
+X = df[symptoms]
+y = df["prognosis"].to_numpy(dtype=np.int32)
+X_test = tr[symptoms]
+y_test = tr["prognosis"].to_numpy(dtype=np.int32)
+
+@st.cache_resource
+def get_models():
+    dt = tree.DecisionTreeClassifier().fit(X, y)
+    rf = RandomForestClassifier().fit(X, y)
+    nb = GaussianNB().fit(X, y)
+
+    acc_dt = accuracy_score(y_test, dt.predict(X_test))
+    acc_rf = accuracy_score(y_test, rf.predict(X_test))
+    acc_nb = accuracy_score(y_test, nb.predict(X_test))
+    return dt, rf, nb, acc_dt, acc_rf, acc_nb
 
 def prepare_input(symptoms_selected):
     temp = [0] * len(symptoms)
@@ -75,14 +88,8 @@ if st.sidebar.button("Predict Disease"):
         st.stop()
     
     st.subheader("Model-Based Predictions")
-    with st.spinner("Training and predicting..."):
-        dt = tree.DecisionTreeClassifier().fit(X, y)
-        rf = RandomForestClassifier().fit(X, y)
-        nb = GaussianNB().fit(X, y)
-
-        acc_dt = accuracy_score(y_test, dt.predict(X_test))
-        acc_rf = accuracy_score(y_test, rf.predict(X_test))
-        acc_nb = accuracy_score(y_test, nb.predict(X_test))
+    with st.spinner("Analyzing symptoms..."):
+        dt, rf, nb, acc_dt, acc_rf, acc_nb = get_models()
 
         pred_dt = predict_model(dt, prepare_input(user_input))
         pred_rf = predict_model(rf, prepare_input(user_input))

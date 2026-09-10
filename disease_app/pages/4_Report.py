@@ -49,15 +49,22 @@ symptoms = [col for col in df.columns if col != "prognosis"]
 diseases = sorted(df["prognosis"].unique())
 
 mapping = {d: i for i, d in enumerate(diseases)}
-df.replace({"prognosis": mapping}, inplace=True)
-tr.replace({"prognosis": mapping}, inplace=True)
+df["prognosis"] = df["prognosis"].map(mapping).astype(int)
+tr["prognosis"] = tr["prognosis"].map(mapping).astype(int)
 
-X, y = df[symptoms], np.ravel(df[["prognosis"]])
-X_test, y_test = tr[symptoms], np.ravel(tr[["prognosis"]])
+X = df[symptoms]
+y = df["prognosis"].to_numpy(dtype=np.int32)
+X_test = tr[symptoms]
+y_test = tr["prognosis"].to_numpy(dtype=np.int32)
 
-# Train model
-model = RandomForestClassifier().fit(X, y)
-accuracy = accuracy_score(y_test, model.predict(X_test))
+# Train model (cached for performance)
+@st.cache_resource
+def get_report_model():
+    m = RandomForestClassifier().fit(X, y)
+    acc = accuracy_score(y_test, m.predict(X_test))
+    return m, acc
+
+model, accuracy = get_report_model()
 
 with st.form("report_form"):
     st.subheader("👤 Patient Details")
